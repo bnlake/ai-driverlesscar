@@ -2,3 +2,13 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
+body {
+  overflow: hidden;
+  background-color: darkgray;
+  text-align: center;
+}
+
+#myCanvas {
+  background-color: lightgray;
+}
