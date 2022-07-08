@@ -1,9 +1,9 @@
 export default class Controls {
 	constructor(
-		private forward: boolean = false,
-		private reverse: boolean = false,
-		private left: boolean = false,
-		private right: boolean = false
+		public forward: boolean = false,
+		public reverse: boolean = false,
+		public left: boolean = false,
+		public right: boolean = false
 	) {
 		this.addEventListeners();
 	}

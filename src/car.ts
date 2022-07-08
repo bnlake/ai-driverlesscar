@@ -1,7 +1,7 @@
 import Controls from './controls';
 
 export default class Car {
-	constructor(private x: number, private y: number, private width: number, private height: number) {
+	constructor(public x: number, public y: number, public width: number, public height: number) {
 		this.controls = new Controls();
 	}
 
@@ -13,5 +13,10 @@ export default class Car {
 		ctx.beginPath();
 		ctx.rect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
 		ctx.fill();
+	}
+
+	update() {
+		if (this.controls.forward) this.y -= 2;
+		if (this.controls.reverse) this.y += 2;
 	}
 }
