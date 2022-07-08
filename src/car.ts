@@ -1,11 +1,15 @@
 import Controls from './controls';
 
 export default class Car {
+	controls: Controls;
+	speed: number;
+	rateOfAcceleration: number;
+
 	constructor(public x: number, public y: number, public width: number, public height: number) {
 		this.controls = new Controls();
+		this.speed = 0;
+		this.rateOfAcceleration = 0.2;
 	}
-
-	controls: Controls;
 
 	draw(ctx: CanvasRenderingContext2D | null) {
 		if (!ctx) return;
@@ -16,7 +20,8 @@ export default class Car {
 	}
 
 	update() {
-		if (this.controls.forward) this.y -= 2;
-		if (this.controls.reverse) this.y += 2;
+		if (this.controls.forward) this.speed += this.rateOfAcceleration;
+		if (this.controls.reverse) this.speed -= this.rateOfAcceleration;
+		this.y -= this.speed;
 	}
 }
