@@ -31,6 +31,10 @@ export default class Car {
 	}
 
 	update() {
+		this.move();
+	}
+
+	private move() {
 		if (this.controls.forward && this.speed < this.maxSpeed) this.speed += this.rateOfAcceleration;
 		if (this.controls.reverse && this.speed > -this.maxSpeed) this.speed -= this.rateOfAcceleration;
 
