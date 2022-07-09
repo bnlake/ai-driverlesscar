@@ -1,5 +1,6 @@
 import Car from './car';
 import Point from './point';
+import Road from './road';
 import Segment from './segment';
 import { lerp } from './utils';
 
@@ -12,7 +13,7 @@ export default class Sensor {
 		return Math.PI / 2;
 	}
 
-	update() {
+	update(road: Road) {
 		this.castRays();
 	}
 

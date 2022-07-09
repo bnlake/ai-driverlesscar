@@ -1,4 +1,5 @@
 import Controls from './controls';
+import Road from './road';
 import Sensor from './sensor';
 
 export default class Car {
@@ -34,9 +35,9 @@ export default class Car {
 		this.sensor.draw(ctx);
 	}
 
-	update() {
+	update(road: Road) {
 		this.move();
-		this.sensor.update();
+		this.sensor.update(road);
 	}
 
 	private move() {
