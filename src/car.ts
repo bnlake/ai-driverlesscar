@@ -1,4 +1,5 @@
 import Controls from './controls';
+import Sensor from './sensor';
 
 export default class Car {
 	controls: Controls;
@@ -9,6 +10,7 @@ export default class Car {
 	rateOfAcceleration: number;
 	rateOfTurn: number = 0.05;
 	friction: number = 0.05;
+	sensor = new Sensor(this);
 
 	constructor(public x: number, public y: number, public width: number, public height: number) {
 		this.controls = new Controls();
@@ -28,10 +30,13 @@ export default class Car {
 		ctx.fill();
 
 		ctx.restore();
+
+		this.sensor.draw(ctx);
 	}
 
 	update() {
 		this.move();
+		this.sensor.update();
 	}
 
 	private move() {
