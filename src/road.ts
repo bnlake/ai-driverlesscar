@@ -1,9 +1,5 @@
 import { lerp } from './utils';
-
-interface Point {
-	x: number;
-	y: number;
-}
+import Point from './point';
 
 type Segment = [Point, Point];
 
@@ -28,20 +24,20 @@ export default class Road {
 		return this.infinity;
 	}
 
-	get topLeft() {
-		return { x: this.left, y: this.top };
+	get topLeft(): Point {
+		return new Point(this.left, this.top);
 	}
 
-	get topRight() {
-		return { x: this.right, y: this.top };
+	get topRight(): Point {
+		return new Point(this.right, this.top);
 	}
 
-	get bottomLeft() {
-		return { x: this.left, y: this.bottom };
+	get bottomLeft(): Point {
+		return new Point(this.left, this.bottom);
 	}
 
-	get bottomRight() {
-		return { x: this.right, y: this.bottom };
+	get bottomRight(): Point {
+		return new Point(this.right, this.bottom);
 	}
 
 	get borders(): Array<Segment> {
