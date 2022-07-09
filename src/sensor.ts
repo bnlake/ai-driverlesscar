@@ -13,21 +13,7 @@ export default class Sensor {
 	}
 
 	update() {
-		this.rays = [];
-
-		for (let i = 0; i < this.rayCount; i++) {
-			const rayAngle =
-				lerp(this.raySpread / 2, -this.raySpread / 2, this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1)) +
-				this.car.angle;
-
-			const start = new Point(this.car.x, this.car.y);
-			const end = new Point(
-				this.car.x - Math.sin(rayAngle) * this.rayLength,
-				this.car.y - Math.cos(rayAngle) * this.rayLength
-			);
-
-			this.rays.push(new Segment(start, end));
-		}
+		this.castRays();
 	}
 
 	draw(ctx: CanvasRenderingContext2D | null) {
@@ -42,6 +28,24 @@ export default class Sensor {
 			ctx.moveTo(a.x, a.y);
 			ctx.lineTo(b.x, b.y);
 			ctx.stroke();
+		}
+	}
+
+	private castRays() {
+		this.rays = [];
+
+		for (let i = 0; i < this.rayCount; i++) {
+			const rayAngle =
+				lerp(this.raySpread / 2, -this.raySpread / 2, this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1)) +
+				this.car.angle;
+
+			const start = new Point(this.car.x, this.car.y);
+			const end = new Point(
+				this.car.x - Math.sin(rayAngle) * this.rayLength,
+				this.car.y - Math.cos(rayAngle) * this.rayLength
+			);
+
+			this.rays.push(new Segment(start, end));
 		}
 	}
 }
