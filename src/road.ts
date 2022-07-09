@@ -1,5 +1,12 @@
 import { lerp } from './utils';
 
+interface Point {
+	x: number;
+	y: number;
+}
+
+type Segment = [Point, Point];
+
 export default class Road {
 	infinity = 10000000;
 
@@ -21,13 +28,46 @@ export default class Road {
 		return this.infinity;
 	}
 
+	get topLeft() {
+		return { x: this.left, y: this.top };
+	}
+
+	get topRight() {
+		return { x: this.right, y: this.top };
+	}
+
+	get bottomLeft() {
+		return { x: this.left, y: this.bottom };
+	}
+
+	get bottomRight() {
+		return { x: this.right, y: this.bottom };
+	}
+
+	get borders(): Array<Segment> {
+		return [
+			[this.topLeft, this.bottomLeft],
+			[this.topRight, this.bottomRight]
+		];
+	}
+
 	draw(ctx: CanvasRenderingContext2D | null) {
 		if (!ctx) return;
 
 		ctx.lineWidth = 5;
 		ctx.strokeStyle = 'white';
 
-		for (let i = 0; i <= this.laneCount; i++) {
+		ctx.setLineDash([]);
+		for (const segment of this.borders) {
+			const [pointA, pointB] = segment;
+			ctx.beginPath();
+			ctx.moveTo(pointA.x, pointA.y);
+			ctx.lineTo(pointB.x, pointB.y);
+			ctx.stroke();
+		}
+
+		ctx.setLineDash([20, 20]);
+		for (let i = 1; i < this.laneCount; i++) {
 			const x = lerp(this.left, this.right, i / this.laneCount);
 
 			ctx.beginPath();
@@ -35,5 +75,11 @@ export default class Road {
 			ctx.lineTo(x, this.bottom);
 			ctx.stroke();
 		}
+	}
+
+	getLaneCenter(laneIndex: number) {
+		if (laneIndex > this.laneCount - 1) return this.left + this.laneWidth / 2;
+
+		return this.left + this.laneWidth / 2 + laneIndex * this.laneWidth;
 	}
 }
