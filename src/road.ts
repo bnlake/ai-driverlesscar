@@ -67,6 +67,8 @@ export default class Road {
 			ctx.lineTo(x, this.bottom);
 			ctx.stroke();
 		}
+
+		ctx.setLineDash([]);
 	}
 
 	getLaneCenter(laneIndex: number) {
