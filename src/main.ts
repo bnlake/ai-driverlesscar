@@ -10,7 +10,7 @@ canvas.width = laneCount * laneWidth + 20;
 const ctx = canvas.getContext('2d');
 const road = new Road(canvas.width / 2, laneCount, laneWidth);
 const laneMargin = 20;
-const car = new Car(road.getLaneCenter(0), 100, laneWidth - laneMargin, (laneWidth - laneMargin) * 1.6);
+const car = new Car(road.getLaneCenter(1), 100, laneWidth - laneMargin, (laneWidth - laneMargin) * 1.6);
 
 function animate() {
 	canvas.height = window.innerHeight;

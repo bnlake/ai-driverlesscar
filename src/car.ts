@@ -2,18 +2,21 @@ import Controls from './controls';
 import Road from './road';
 import Sensor from './sensor';
 import Point from './point';
+import { polyIntersect } from './utils';
+import Segment from './segment';
 
 export default class Car {
 	controls: Controls;
 	speed: number;
-	maxSpeed: number = 3;
+	maxSpeed: number = 4;
 	angle = 0;
 
 	rateOfAcceleration: number;
 	rateOfTurn: number = 0.05;
 	friction: number = 0.05;
 	sensor = new Sensor(this, 5);
-	polygon: Array<Point> = [];
+	polygon: Array<Segment> = [];
+	damaged = false;
 
 	constructor(public x: number, public y: number, public width: number, public height: number) {
 		this.controls = new Controls();
@@ -24,10 +27,12 @@ export default class Car {
 	draw(ctx: CanvasRenderingContext2D | null) {
 		if (!ctx) return;
 
+		if (this.damaged) ctx.fillStyle = 'gray';
+		else ctx.fillStyle = 'black';
 		ctx.beginPath();
-		ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+		ctx.moveTo(this.polygon[0].a.x, this.polygon[0].a.y);
 		for (let i = 1; i < this.polygon.length; i++) {
-			ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+			ctx.lineTo(this.polygon[i].a.x, this.polygon[i].a.y);
 		}
 		ctx.fill();
 
@@ -35,8 +40,12 @@ export default class Car {
 	}
 
 	update(road: Road) {
-		this.move();
-		this.polygon = this.createPolygon();
+		if (!this.damaged) {
+			this.move();
+			this.polygon = this.createPolygon();
+			this.damaged = this.assessDamage(road);
+		}
+
 		this.sensor.update(road);
 	}
 
@@ -59,7 +68,7 @@ export default class Car {
 		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
-	private createPolygon(): Array<Point> {
+	private createPolygon(): Array<Segment> {
 		const points = [];
 		const rad = Math.hypot(this.width, this.height) / 2;
 		const alpha = Math.atan2(this.width, this.height);
@@ -83,6 +92,16 @@ export default class Car {
 			)
 		);
 
-		return points;
+		const segments: Array<Segment> = [];
+		for (let i = 0; i < points.length; i++) {
+			segments.push(new Segment(points[i], points[(i + 1) % points.length]));
+		}
+
+		return segments;
+	}
+
+	private assessDamage(road: Road): boolean {
+		if (polyIntersect(this.polygon, road.borders)) return true;
+		return false;
 	}
 }

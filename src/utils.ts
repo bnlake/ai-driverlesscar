@@ -26,3 +26,14 @@ export function getIntersection(segmentA: Segment, segmentB: Segment): Touch | n
 
 	return null;
 }
+
+export function polyIntersect(polyA: Array<Segment>, polyB: Array<Segment>): boolean {
+	for (const segA of polyA) {
+		for (const segB of polyB) {
+			const touch = getIntersection(segA, segB);
+
+			if (touch) return true;
+		}
+	}
+	return false;
+}
