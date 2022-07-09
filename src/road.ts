@@ -1,7 +1,6 @@
 import { lerp } from './utils';
 import Point from './point';
-
-type Segment = [Point, Point];
+import Segment from './segment';
 
 export default class Road {
 	infinity = 10000000;
@@ -41,10 +40,7 @@ export default class Road {
 	}
 
 	get borders(): Array<Segment> {
-		return [
-			[this.topLeft, this.bottomLeft],
-			[this.topRight, this.bottomRight]
-		];
+		return [new Segment(this.topLeft, this.bottomLeft), new Segment(this.topRight, this.bottomRight)];
 	}
 
 	draw(ctx: CanvasRenderingContext2D | null) {
