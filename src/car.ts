@@ -10,7 +10,7 @@ export default class Car {
 	rateOfAcceleration: number;
 	rateOfTurn: number = 0.05;
 	friction: number = 0.05;
-	sensor = new Sensor(this);
+	sensor = new Sensor(this, 5);
 
 	constructor(public x: number, public y: number, public width: number, public height: number) {
 		this.controls = new Controls();

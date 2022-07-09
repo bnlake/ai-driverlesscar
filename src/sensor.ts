@@ -16,7 +16,7 @@ export default class Sensor {
 		this.rays = [];
 
 		for (let i = 0; i < this.rayCount; i++) {
-			const rayAngle = lerp(this.raySpread / 2, -this.raySpread / 2, i / (this.rayCount - 1));
+			const rayAngle = lerp(this.raySpread / 2, -this.raySpread / 2, i / (this.rayCount - 1)) + this.car.angle;
 
 			const start = new Point(this.car.x, this.car.y);
 			const end = new Point(
