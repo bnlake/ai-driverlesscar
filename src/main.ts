@@ -21,7 +21,7 @@ const traffic: Array<Car> = [
 function animate() {
   canvas.height = window.innerHeight;
   for (const car of traffic) car.update(road);
-  car.update(road);
+  car.update(road, traffic);
 
   ctx?.save();
   ctx?.translate(0, -car.y + canvas.height * 0.7);

@@ -49,14 +49,14 @@ export default class Car {
     this.sensor?.draw(ctx);
   }
 
-  update(road: Road) {
+  update(road: Road, traffic: Array<Car> = []) {
     if (!this.damaged) {
       this.move();
       this.polygon = this.createPolygon();
-      this.damaged = this.assessDamage(road);
+      this.damaged = this.assessDamage(road, traffic);
     }
 
-    this.sensor?.update(road);
+    this.sensor?.update(road, traffic);
   }
 
   private move() {
@@ -118,8 +118,10 @@ export default class Car {
     return segments;
   }
 
-  private assessDamage(road: Road): boolean {
+  private assessDamage(road: Road, traffic: Array<Car>): boolean {
     if (polyIntersect(this.polygon, road.borders)) return true;
+    for (const car of traffic)
+      if (polyIntersect(this.polygon, car.polygon)) return true;
     return false;
   }
 }
