@@ -15,7 +15,7 @@ export default class Car {
   rateOfAcceleration: number;
   rateOfTurn: number = 0.05;
   friction: number = 0.05;
-  sensor = new Sensor(this, 5);
+  sensor: Sensor | null = null;
   polygon: Array<Segment> = [];
   damaged = false;
 
@@ -31,6 +31,7 @@ export default class Car {
     this.speed = 0;
     this.maxSpeed = maxSpeed;
     this.rateOfAcceleration = 0.2;
+    if (controlType === "KEYS") this.sensor = new Sensor(this, 5);
   }
 
   draw(ctx: CanvasRenderingContext2D | null) {
@@ -45,7 +46,7 @@ export default class Car {
     }
     ctx.fill();
 
-    this.sensor.draw(ctx);
+    this.sensor?.draw(ctx);
   }
 
   update(road: Road) {
@@ -55,7 +56,7 @@ export default class Car {
       this.damaged = this.assessDamage(road);
     }
 
-    this.sensor.update(road);
+    this.sensor?.update(road);
   }
 
   private move() {
