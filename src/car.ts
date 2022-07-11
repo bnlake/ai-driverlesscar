@@ -24,10 +24,12 @@ export default class Car {
     public y: number,
     public width: number,
     public height: number,
-    public controlType: ControlType
+    public controlType: ControlType,
+    maxSpeed: number = 4
   ) {
     this.controls = new Controls(controlType);
     this.speed = 0;
+    this.maxSpeed = maxSpeed;
     this.rateOfAcceleration = 0.2;
   }
 

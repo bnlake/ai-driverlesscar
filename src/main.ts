@@ -13,7 +13,7 @@ canvas.width = laneCount * laneWidth + 20;
 
 const ctx = canvas.getContext("2d");
 const road = new Road(canvas.width / 2, laneCount, laneWidth);
-const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, "KEYS");
+const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, "KEYS", 6);
 const traffic: Array<Car> = [
   new Car(road.getLaneCenter(1), -100, carWidth, carHeight, "DUMMY"),
 ];
