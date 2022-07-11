@@ -28,8 +28,8 @@ function animate() {
 
   road.draw(ctx);
 
-  car.draw(ctx);
-  for (const car of traffic) car.draw(ctx);
+  for (const car of traffic) car.draw(ctx, "red");
+  car.draw(ctx, "blue");
   ctx?.restore();
   requestAnimationFrame(animate);
 }

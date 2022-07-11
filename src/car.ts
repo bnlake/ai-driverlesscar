@@ -4,7 +4,7 @@ import Sensor from "./sensor";
 import Point from "./point";
 import { polyIntersect } from "./utils";
 import Segment from "./segment";
-import { ControlType } from "./types";
+import { CarColor, ControlType } from "./types";
 
 export default class Car {
   controls: Controls;
@@ -34,11 +34,11 @@ export default class Car {
     if (controlType === "KEYS") this.sensor = new Sensor(this, 5);
   }
 
-  draw(ctx: CanvasRenderingContext2D | null) {
+  draw(ctx: CanvasRenderingContext2D | null, carColor: CarColor) {
     if (!ctx) return;
 
     if (this.damaged) ctx.fillStyle = "gray";
-    else ctx.fillStyle = "black";
+    else ctx.fillStyle = carColor;
     ctx.beginPath();
     ctx.moveTo(this.polygon[0].a.x, this.polygon[0].a.y);
     for (let i = 1; i < this.polygon.length; i++) {

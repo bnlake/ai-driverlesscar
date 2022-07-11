@@ -12,7 +12,7 @@ export default class Sensor {
   constructor(
     private car: Car,
     public rayCount: number = 3,
-    public rayLength: number = 150
+    public rayLength: number = 200
   ) {}
 
   get raySpread() {
