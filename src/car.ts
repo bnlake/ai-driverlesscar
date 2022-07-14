@@ -1,127 +1,159 @@
-import Controls from "./controls";
-import Road from "./road";
-import Sensor from "./sensor";
-import Point from "./point";
-import { polyIntersect } from "./utils";
-import Segment from "./segment";
-import { CarColor, ControlType } from "./types";
+import Controls, { ControlType } from './controls';
+import Sensor from './sensor';
+import { CarColor } from './types';
+import { polyIntersect } from './utils';
+import Point from './point';
+import Road from './road';
 
 export default class Car {
-  controls: Controls;
-  speed: number;
-  maxSpeed: number = 4;
-  angle = 0;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	polygon: Array<Point> | undefined;
 
-  rateOfAcceleration: number;
-  rateOfTurn: number = 0.05;
-  friction: number = 0.05;
-  sensor: Sensor | null = null;
-  polygon: Array<Segment> = [];
-  damaged = false;
+	speed: number;
+	acceleration: number;
+	maxSpeed: number;
 
-  constructor(
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number,
-    public controlType: ControlType,
-    maxSpeed: number = 4
-  ) {
-    this.controls = new Controls(controlType);
-    this.speed = 0;
-    this.maxSpeed = maxSpeed;
-    this.rateOfAcceleration = 0.2;
-    if (controlType === "KEYS") this.sensor = new Sensor(this, 5);
-  }
+	friction: number;
+	angle: number;
+	damaged: boolean;
 
-  draw(ctx: CanvasRenderingContext2D | null, carColor: CarColor) {
-    if (!ctx) return;
+	sensor: Sensor | undefined;
+	controls: Controls;
 
-    if (this.damaged) ctx.fillStyle = "gray";
-    else ctx.fillStyle = carColor;
-    ctx.beginPath();
-    ctx.moveTo(this.polygon[0].a.x, this.polygon[0].a.y);
-    for (let i = 1; i < this.polygon.length; i++) {
-      ctx.lineTo(this.polygon[i].a.x, this.polygon[i].a.y);
-    }
-    ctx.fill();
+	constructor(x: number, y: number, width: number, height: number, controlType: ControlType, maxSpeed: number = 3) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 
-    this.sensor?.draw(ctx);
-  }
+		this.speed = 0;
+		this.acceleration = 0.2;
+		this.maxSpeed = maxSpeed;
+		this.friction = 0.05;
+		this.angle = 0;
+		this.damaged = false;
 
-  update(road: Road, traffic: Array<Car> = []) {
-    if (!this.damaged) {
-      this.move();
-      this.polygon = this.createPolygon();
-      this.damaged = this.assessDamage(road, traffic);
-    }
+		if (controlType === ControlType.User) {
+			this.sensor = new Sensor(this);
+		}
+		this.controls = new Controls(controlType);
+	}
 
-    this.sensor?.update(road, traffic);
-  }
+	update(road: Road, traffic: Array<Car>) {
+		if (!this.damaged) {
+			this.move();
+			this.polygon = this.createPolygon();
+			this.damaged = this.assessDamage(road, traffic);
+		}
+		if (this.sensor) {
+			this.sensor.update(road, traffic);
+		}
+	}
 
-  private move() {
-    if (this.controls.forward && this.speed < this.maxSpeed)
-      this.speed += this.rateOfAcceleration;
-    if (this.controls.reverse && this.speed > -this.maxSpeed)
-      this.speed -= this.rateOfAcceleration;
+	private assessDamage(road: Road, traffic: Array<Car>) {
+		if (!this.polygon) return false;
 
-    if (this.speed !== 0) {
-      const flip = this.speed > 0 ? 1 : -1;
-      if (this.controls.left) this.angle += this.rateOfTurn * flip;
-      if (this.controls.right) this.angle -= this.rateOfTurn * flip;
-    }
+		for (let i = 0; i < road.borders.length; i++) {
+			if (polyIntersect(this.polygon, road.borders[i])) {
+				return true;
+			}
+		}
+		for (let i = 0; i < traffic.length; i++) {
+			const car = traffic[i];
 
-    if (this.speed > 0) this.speed -= this.friction;
-    if (this.speed < 0) this.speed += this.friction;
+			if (car.polygon) {
+				if (polyIntersect(this.polygon, car.polygon)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-    if (Math.abs(this.speed) <= this.friction) this.speed = 0;
+	private createPolygon(): Array<Point> {
+		const points: Array<Point> = [];
+		const rad = Math.hypot(this.width, this.height) / 2;
+		const alpha = Math.atan2(this.width, this.height);
+		points.push(
+			new Point(this.x - Math.sin(this.angle - alpha) * rad, this.y - Math.cos(this.angle - alpha) * rad)
+		);
+		points.push(
+			new Point(this.x - Math.sin(this.angle + alpha) * rad, this.y - Math.cos(this.angle + alpha) * rad)
+		);
+		points.push(
+			new Point(
+				this.x - Math.sin(Math.PI + this.angle - alpha) * rad,
+				this.y - Math.cos(Math.PI + this.angle - alpha) * rad
+			)
+		);
+		points.push(
+			new Point(
+				this.x - Math.sin(Math.PI + this.angle + alpha) * rad,
+				this.y - Math.cos(Math.PI + this.angle + alpha) * rad
+			)
+		);
+		return points;
+	}
 
-    this.x -= Math.sin(this.angle) * this.speed;
-    this.y -= Math.cos(this.angle) * this.speed;
-  }
+	private move() {
+		if (this.controls.forward) {
+			this.speed += this.acceleration;
+		}
+		if (this.controls.reverse) {
+			this.speed -= this.acceleration;
+		}
 
-  private createPolygon(): Array<Segment> {
-    const points = [];
-    const rad = Math.hypot(this.width, this.height) / 2;
-    const alpha = Math.atan2(this.width, this.height);
+		if (this.speed > this.maxSpeed) {
+			this.speed = this.maxSpeed;
+		}
+		if (this.speed < -this.maxSpeed / 2) {
+			this.speed = -this.maxSpeed / 2;
+		}
 
-    points.push(
-      new Point(
-        this.x - Math.sin(this.angle - alpha) * rad,
-        this.y - Math.cos(this.angle - alpha) * rad
-      )
-    );
-    points.push(
-      new Point(
-        this.x - Math.sin(this.angle + alpha) * rad,
-        this.y - Math.cos(this.angle + alpha) * rad
-      )
-    );
-    points.push(
-      new Point(
-        this.x - Math.sin(Math.PI + this.angle - alpha) * rad,
-        this.y - Math.cos(Math.PI + this.angle - alpha) * rad
-      )
-    );
-    points.push(
-      new Point(
-        this.x - Math.sin(Math.PI + this.angle + alpha) * rad,
-        this.y - Math.cos(Math.PI + this.angle + alpha) * rad
-      )
-    );
+		if (this.speed > 0) {
+			this.speed -= this.friction;
+		}
+		if (this.speed < 0) {
+			this.speed += this.friction;
+		}
+		if (Math.abs(this.speed) < this.friction) {
+			this.speed = 0;
+		}
 
-    const segments: Array<Segment> = [];
-    for (let i = 0; i < points.length; i++) {
-      segments.push(new Segment(points[i], points[(i + 1) % points.length]));
-    }
+		if (this.speed !== 0) {
+			const flip = this.speed > 0 ? 1 : -1;
+			if (this.controls.left) {
+				this.angle += 0.03 * flip;
+			}
+			if (this.controls.right) {
+				this.angle -= 0.03 * flip;
+			}
+		}
 
-    return segments;
-  }
+		this.x -= Math.sin(this.angle) * this.speed;
+		this.y -= Math.cos(this.angle) * this.speed;
+	}
 
-  private assessDamage(road: Road, traffic: Array<Car>): boolean {
-    if (polyIntersect(this.polygon, road.borders)) return true;
-    for (const car of traffic)
-      if (polyIntersect(this.polygon, car.polygon)) return true;
-    return false;
-  }
+	draw(ctx: CanvasRenderingContext2D | null, color: CarColor) {
+		if (!this.polygon || !ctx) return;
+
+		if (this.damaged) {
+			ctx.fillStyle = 'gray';
+		} else {
+			ctx.fillStyle = color;
+		}
+		ctx.beginPath();
+		ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+		for (let i = 1; i < this.polygon.length; i++) {
+			ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+		}
+		ctx.fill();
+
+		if (this.sensor) {
+			this.sensor.draw(ctx);
+		}
+	}
 }

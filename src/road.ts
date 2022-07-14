@@ -1,18 +1,22 @@
 import { lerp } from './utils';
 import Point from './point';
-import Segment from './segment';
 
 export default class Road {
-	infinity = 10000000;
+	private infinity = 1000000;
 
-	constructor(public x: number = 0, public laneCount: number = 3, public laneWidth: number = 100) {}
+	x: number;
 
-	get left() {
-		return this.x - (this.laneCount * this.laneWidth) / 2;
+	laneCount: number;
+	laneWidth: number;
+
+	constructor(x: number, laneCount = 3, laneWidth: number = 70) {
+		this.x = x;
+		this.laneWidth = laneWidth;
+		this.laneCount = laneCount;
 	}
 
-	get right() {
-		return this.x + (this.laneCount * this.laneWidth) / 2;
+	get width() {
+		return this.laneCount * this.laneWidth;
 	}
 
 	get top() {
@@ -23,24 +27,27 @@ export default class Road {
 		return this.infinity;
 	}
 
-	get topLeft(): Point {
-		return new Point(this.left, this.top);
+	get left() {
+		return this.x - this.width / 2;
+	}
+	get right() {
+		return this.x + this.width / 2;
 	}
 
-	get topRight(): Point {
-		return new Point(this.right, this.top);
+	get borders(): Array<Array<Point>> {
+		const topLeft = new Point(this.left, this.top);
+		const topRight = new Point(this.right, this.top);
+		const bottomLeft = new Point(this.left, this.bottom);
+		const bottomRight = new Point(this.right, this.bottom);
+		return [
+			[topLeft, bottomLeft],
+			[topRight, bottomRight]
+		];
 	}
 
-	get bottomLeft(): Point {
-		return new Point(this.left, this.bottom);
-	}
-
-	get bottomRight(): Point {
-		return new Point(this.right, this.bottom);
-	}
-
-	get borders(): Array<Segment> {
-		return [new Segment(this.topLeft, this.bottomLeft), new Segment(this.topRight, this.bottomRight)];
+	getLaneCenter(laneIndex: number) {
+		const laneWidth = this.width / this.laneCount;
+		return this.left + laneWidth / 2 + Math.min(laneIndex, this.laneCount - 1) * laneWidth;
 	}
 
 	draw(ctx: CanvasRenderingContext2D | null) {
@@ -49,19 +56,10 @@ export default class Road {
 		ctx.lineWidth = 5;
 		ctx.strokeStyle = 'white';
 
-		ctx.setLineDash([]);
-		for (const segment of this.borders) {
-			const [pointA, pointB] = segment;
-			ctx.beginPath();
-			ctx.moveTo(pointA.x, pointA.y);
-			ctx.lineTo(pointB.x, pointB.y);
-			ctx.stroke();
-		}
-
-		ctx.setLineDash([20, 20]);
-		for (let i = 1; i < this.laneCount; i++) {
+		for (let i = 1; i <= this.laneCount - 1; i++) {
 			const x = lerp(this.left, this.right, i / this.laneCount);
 
+			ctx.setLineDash([20, 20]);
 			ctx.beginPath();
 			ctx.moveTo(x, this.top);
 			ctx.lineTo(x, this.bottom);
@@ -69,11 +67,11 @@ export default class Road {
 		}
 
 		ctx.setLineDash([]);
-	}
-
-	getLaneCenter(laneIndex: number) {
-		if (laneIndex > this.laneCount - 1) return this.left + this.laneWidth / 2;
-
-		return this.left + this.laneWidth / 2 + laneIndex * this.laneWidth;
+		this.borders.forEach((border) => {
+			ctx.beginPath();
+			ctx.moveTo(border[0].x, border[0].y);
+			ctx.lineTo(border[1].x, border[1].y);
+			ctx.stroke();
+		});
 	}
 }

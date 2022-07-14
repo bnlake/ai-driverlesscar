@@ -1,8 +1,9 @@
-import Car from "./car";
-import Road from "./road";
-import "./style.css";
+import Car from './car';
+import { ControlType } from './controls';
+import Road from './road';
+import './style.css';
 
-const canvas = document.getElementById("myCanvas") as HTMLCanvasElement;
+const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;
 const laneCount = 6;
 const laneWidth = 70;
 const laneMargin = 20;
@@ -11,27 +12,25 @@ const carHeight = laneWidth * 1.6;
 
 canvas.width = laneCount * laneWidth + 20;
 
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext('2d');
 const road = new Road(canvas.width / 2, laneCount, laneWidth);
-const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, "KEYS", 6);
-const traffic: Array<Car> = [
-  new Car(road.getLaneCenter(1), -100, carWidth, carHeight, "DUMMY"),
-];
+const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, ControlType.User, 6);
+const traffic: Array<Car> = [new Car(road.getLaneCenter(1), -100, carWidth, carHeight, ControlType.None)];
 
 function animate() {
-  canvas.height = window.innerHeight;
-  for (const car of traffic) car.update(road);
-  car.update(road, traffic);
+	canvas.height = window.innerHeight;
+	for (const car of traffic) car.update(road, traffic);
+	car.update(road, traffic);
 
-  ctx?.save();
-  ctx?.translate(0, -car.y + canvas.height * 0.7);
+	ctx?.save();
+	ctx?.translate(0, -car.y + canvas.height * 0.7);
 
-  road.draw(ctx);
+	road.draw(ctx);
 
-  for (const car of traffic) car.draw(ctx, "red");
-  car.draw(ctx, "blue");
-  ctx?.restore();
-  requestAnimationFrame(animate);
+	for (const car of traffic) car.draw(ctx, 'red');
+	car.draw(ctx, 'blue');
+	ctx?.restore();
+	requestAnimationFrame(animate);
 }
 
 animate();

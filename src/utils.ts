@@ -1,5 +1,5 @@
-import Segment from './segment';
 import Touch from './touch';
+import Point from './point';
 
 /**
  * Linear interpolation function
@@ -9,30 +9,38 @@ export function lerp(leftLimit: number, rightLimit: number, percentage: number):
 	return leftLimit + (rightLimit - leftLimit) * percentage;
 }
 
-export function getIntersection(segmentA: Segment, segmentB: Segment): Touch | null {
-	const [a, b] = segmentA;
-	const [c, d] = segmentB;
-	const tTop = (d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x);
-	const uTop = (c.y - a.y) * (a.x - b.x) - (c.x - b.x) * (a.y - b.y);
-	const bottom = (d.y - c.y) * (b.x - a.x) - (d.x - c.x) * (b.y - a.y);
+export function getIntersection(A: Point, B: Point, C: Point, D: Point): Touch | null {
+	const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
+	const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
+	const bottom = (D.y - C.y) * (B.x - A.x) - (D.x - C.x) * (B.y - A.y);
 
 	if (bottom !== 0) {
 		const t = tTop / bottom;
 		const u = uTop / bottom;
 		if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-			return new Touch(lerp(a.x, b.x, t), lerp(a.y, b.y, t), t);
+			return {
+				x: lerp(A.x, B.x, t),
+				y: lerp(A.y, B.y, t),
+				offset: t
+			};
 		}
 	}
 
 	return null;
 }
 
-export function polyIntersect(polyA: Array<Segment>, polyB: Array<Segment>): boolean {
-	for (const segA of polyA) {
-		for (const segB of polyB) {
-			const touch = getIntersection(segA, segB);
-
-			if (touch) return true;
+export function polyIntersect(poly1: Array<Point>, poly2: Array<Point>) {
+	for (let i = 0; i < poly1.length; i++) {
+		for (let j = 0; j < poly2.length; j++) {
+			const touch = getIntersection(
+				poly1[i],
+				poly1[(i + 1) % poly1.length],
+				poly2[j],
+				poly2[(j + 1) % poly2.length]
+			);
+			if (touch) {
+				return true;
+			}
 		}
 	}
 	return false;
