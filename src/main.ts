@@ -19,7 +19,7 @@ const traffic: Array<Car> = [new Car(road.getLaneCenter(1), -100, carWidth, carH
 
 function animate() {
 	canvas.height = window.innerHeight;
-	for (const car of traffic) car.update(road, traffic);
+	for (const car of traffic) car.update(road, []);
 	car.update(road, traffic);
 
 	ctx?.save();
