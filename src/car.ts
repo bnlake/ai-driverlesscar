@@ -4,6 +4,7 @@ import { CarColor } from './types';
 import { polyIntersect } from './utils';
 import Point from './point';
 import Road from './road';
+import NeuralNetwork from './neural/network';
 
 export default class Car {
 	x: number;
@@ -22,8 +23,16 @@ export default class Car {
 
 	sensor: Sensor | undefined;
 	controls: Controls;
+	brain: NeuralNetwork | null = null;
 
-	constructor(x: number, y: number, width: number, height: number, controlType: ControlType, maxSpeed: number = 3) {
+	constructor(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		public controlType: ControlType,
+		maxSpeed: number = 3
+	) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -36,10 +45,16 @@ export default class Car {
 		this.angle = 0;
 		this.damaged = false;
 
-		if (controlType === ControlType.User) {
+		if (controlType !== ControlType.None) {
 			this.sensor = new Sensor(this);
+			this.brain = new NeuralNetwork([this.sensor?.rayCount ?? 0, 6, 4]);
 		}
+
 		this.controls = new Controls(controlType);
+	}
+
+	get useBrain() {
+		return this.controlType === ControlType.AI;
 	}
 
 	update(road: Road, traffic: Array<Car>) {
@@ -50,6 +65,16 @@ export default class Car {
 		}
 		if (this.sensor) {
 			this.sensor.update(road, traffic);
+			const offsets = this.sensor.readings.map((s) => (s?.offset ? 1 - s?.offset : 0)); // Turn sensor readings into 1 | 0's
+			const outputs = NeuralNetwork.feedForward(offsets, this.brain);
+			console.log(outputs);
+
+			if (this.useBrain) {
+				this.controls.forward = outputs?.[0] === 1 ? true : false;
+				this.controls.left = outputs?.[1] === 1 ? true : false;
+				this.controls.right = outputs?.[2] === 1 ? true : false;
+				this.controls.reverse = outputs?.[3] === 1 ? true : false;
+			}
 		}
 	}
 

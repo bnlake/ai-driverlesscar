@@ -1,4 +1,3 @@
-import { InputCount } from '../types';
 import Level from './level';
 
 export default class NeuralNetwork {
@@ -11,7 +10,7 @@ export default class NeuralNetwork {
 		}
 	}
 
-	public static feedForward(givenInputs: InputCount, network: NeuralNetwork | null) {
+	public static feedForward(givenInputs: Array<number>, network: NeuralNetwork | null) {
 		if (!network) return;
 
 		let outputs = Level.feedForward(givenInputs, network.levels[0]);

@@ -1,5 +1,3 @@
-import { InputCount } from '../types';
-
 export default class Level {
 	inputs;
 	outputs;
@@ -35,7 +33,7 @@ export default class Level {
 		}
 	}
 
-	public static feedForward(givenInputs: InputCount, level: Level): Array<number> {
+	public static feedForward(givenInputs: Array<number>, level: Level): Array<number> {
 		for (let i = 0; i < level.inputs.length; i++) {
 			level.inputs[i] = givenInputs[i];
 		}
