@@ -64,10 +64,12 @@ function generateCars(n: number) {
 	return cars;
 }
 
+// @ts-ignore
 window.save = function save() {
 	localStorage.setItem('bestBrain', JSON.stringify(bestCar.brain));
 };
 
+// @ts-ignore
 window.reset = function reset() {
 	localStorage.clear();
 };
