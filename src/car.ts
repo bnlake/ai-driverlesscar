@@ -161,7 +161,7 @@ export default class Car {
 		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
-	draw(ctx: CanvasRenderingContext2D | null, color: CarColor) {
+	draw(ctx: CanvasRenderingContext2D | null, color: CarColor, drawSensors: boolean = false) {
 		if (!this.polygon || !ctx) return;
 
 		if (this.damaged) {
@@ -176,7 +176,7 @@ export default class Car {
 		}
 		ctx.fill();
 
-		if (this.sensor) {
+		if (this.sensor && drawSensors) {
 			this.sensor.draw(ctx);
 		}
 	}

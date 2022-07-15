@@ -20,28 +20,41 @@ const carCtx = carCanvas.getContext('2d');
 const networkCtx = networkCanvas.getContext('2d');
 
 const road = new Road(carCanvas.width / 2, laneCount, laneWidth);
-const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, ControlType.AI, 6);
+const cars = generateCars(100);
 const traffic: Array<Car> = [new Car(road.getLaneCenter(1), -100, carWidth, carHeight, ControlType.None)];
+
+animate();
 
 function animate(time: number = 0) {
 	if (!carCtx || !networkCtx) return;
 
 	carCanvas.height = networkCanvas.height = window.innerHeight;
 	for (const car of traffic) car.update(road, []);
-	car.update(road, traffic);
+	for (const car of cars) car.update(road, traffic);
 
 	carCtx?.save();
-	carCtx?.translate(0, -car.y + carCanvas.height * 0.7);
+	carCtx?.translate(0, -cars[0].y + carCanvas.height * 0.7);
 
 	road.draw(carCtx);
 
 	for (const car of traffic) car.draw(carCtx, 'red');
-	car.draw(carCtx, 'blue');
+	carCtx.globalAlpha = 0.2;
+	for (const car of cars) car.draw(carCtx, 'blue');
+	carCtx.globalAlpha = 1;
+	cars[0].draw(carCtx, 'blue', true);
 	carCtx?.restore();
 
 	networkCtx.lineDashOffset = -time / 40;
-	Visualizer.drawNetwork(networkCtx, car.brain);
+	Visualizer.drawNetwork(networkCtx, cars[0].brain);
 	requestAnimationFrame(animate);
 }
 
-animate();
+function generateCars(n: number) {
+	const cars: Array<Car> = [];
+
+	for (let i = 1; i <= n; i++) {
+		cars.push(new Car(road.getLaneCenter(1), 100, carWidth, carHeight, ControlType.AI, 6));
+	}
+
+	return cars;
+}
