@@ -1,8 +1,8 @@
 export default class Level {
-	inputs;
-	outputs;
-	biases;
-	weights;
+	inputs: Array<number>;
+	outputs: Array<number>;
+	biases: Array<number>;
+	weights: Array<Array<number>>;
 
 	constructor(inputCount: number, outputCount: number) {
 		this.inputs = new Array(inputCount);
