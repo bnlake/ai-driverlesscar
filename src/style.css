@@ -4,9 +4,25 @@ html, body {
 }
 
 body {
-  overflow: hidden;
   background-color: darkgray;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#buttons {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  border: 0;
+  margin: 2px;
+  padding: 5px;
+}
+
+button:hover {
+  background-color: blue;
 }
 
 #carCanvas {

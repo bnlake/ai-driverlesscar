@@ -3,6 +3,7 @@ import { ControlType } from './controls';
 import Road from './road';
 import Visualizer from './neural/visualizer';
 import './style.css';
+import NeuralNetwork from './neural/network';
 
 const carCanvas = document.getElementById('carCanvas') as HTMLCanvasElement;
 const networkCanvas = document.getElementById('networkCanvas') as HTMLCanvasElement;
@@ -23,6 +24,9 @@ const road = new Road(carCanvas.width / 2, laneCount, laneWidth);
 const cars = generateCars(100);
 const traffic: Array<Car> = [new Car(road.getLaneCenter(1), -100, carWidth, carHeight, ControlType.None)];
 
+let bestCar = cars[0];
+bestCar.brain = getBestBrain() ?? cars[0].brain;
+
 animate();
 
 function animate(time: number = 0) {
@@ -31,10 +35,10 @@ function animate(time: number = 0) {
 	carCanvas.height = networkCanvas.height = window.innerHeight;
 	for (const car of traffic) car.update(road, []);
 	for (const car of cars) car.update(road, traffic);
-	const bestCar = cars.find((car) => car.y === Math.min(...cars.map((car) => car.y)));
+	bestCar = cars.find((car) => car.y === Math.min(...cars.map((car) => car.y))) ?? cars[0];
 
 	carCtx?.save();
-	carCtx?.translate(0, -(bestCar?.y ?? cars[0].y) + carCanvas.height * 0.7);
+	carCtx?.translate(0, -bestCar.y + carCanvas.height * 0.7);
 
 	road.draw(carCtx);
 
@@ -46,7 +50,7 @@ function animate(time: number = 0) {
 	carCtx?.restore();
 
 	networkCtx.lineDashOffset = -time / 40;
-	Visualizer.drawNetwork(networkCtx, bestCar?.brain ?? cars[0].brain);
+	Visualizer.drawNetwork(networkCtx, bestCar.brain);
 	requestAnimationFrame(animate);
 }
 
@@ -58,4 +62,18 @@ function generateCars(n: number) {
 	}
 
 	return cars;
+}
+
+window.save = function save() {
+	localStorage.setItem('bestBrain', JSON.stringify(bestCar.brain));
+};
+
+window.reset = function reset() {
+	localStorage.clear();
+};
+
+function getBestBrain(): NeuralNetwork | null {
+	const bestBrain = localStorage.getItem('bestBrain');
+	if (!bestBrain) return null;
+	return JSON.parse(bestBrain);
 }
