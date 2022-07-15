@@ -23,7 +23,9 @@ const road = new Road(carCanvas.width / 2, laneCount, laneWidth);
 const car = new Car(road.getLaneCenter(1), 100, carWidth, carHeight, ControlType.AI, 6);
 const traffic: Array<Car> = [new Car(road.getLaneCenter(1), -100, carWidth, carHeight, ControlType.None)];
 
-function animate() {
+function animate(time: number = 0) {
+	if (!carCtx || !networkCtx) return;
+
 	carCanvas.height = networkCanvas.height = window.innerHeight;
 	for (const car of traffic) car.update(road, []);
 	car.update(road, traffic);
@@ -37,6 +39,7 @@ function animate() {
 	car.draw(carCtx, 'blue');
 	carCtx?.restore();
 
+	networkCtx.lineDashOffset = -time / 40;
 	Visualizer.drawNetwork(networkCtx, car.brain);
 	requestAnimationFrame(animate);
 }
